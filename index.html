@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="text/html; charset=utf-8" />
+    <title>Công Cụ Nối Và Tách File TXT</title>
+    <meta http-equiv="content-script-type" content="text/javascript" />
+    <meta http-equiv="content-style-type" content="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+<style>
+html,body {
+    width: 100%;
+    background: black;
+    color: white;
+}
+
+h2 {
+    text-align: center;
+    position: relative;
+}
+
+label.input {
+    display: block;
+    font-size: 2.5vh;
+    padding: 7px;
+    border-bottom: 2px dashed;
+    margin-bottom: 7px;
+}
+label.input span {
+    width: 30%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+label.input input {
+    padding: 7px;
+    border: 0;
+    outline: 0;
+    font-size: 2vh;
+}
+
+label.input.submit {
+    border: 0;
+    text-align: center;
+}
+
+button.btnInput {
+    background: red;
+    color: white;
+    padding: 10px;
+    font-size: 2.5vh;
+    outline: 0;
+    border: 0;
+    min-width: 60%;
+}
+
+button.btnInput:hover {
+    background: brown;
+}
+button.change {
+    position: absolute;
+    left: 0;
+    background: cadetblue;
+    padding: 10px;
+    font-size: 2vh;
+    color: white;
+    border: 0;
+}
+.main-body {
+    display: none;
+}
+
+.main-body.active {
+    display: block;
+}
+select.list-thang {
+    width: 79%;
+    font-size: 2.4vh;
+    margin: 0 auto;
+    display: inline-block;
+    text-align: center;
+    padding: 5px;
+}
+
+.main-body.result.active {
+    text-align: center;
+}
+table.content-thunhap {
+    border-color: white;
+    margin-top: 20px;
+}
+
+tr,td,th {
+    border-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+</style>
+</head>
+<body id="body-page">
+<div class="content">
+	<h2><button class="change" onclick="change()"><></button>Quản Lý Chi Tiêu</h2>
+	<div class="main-body control active">
+		<label class="input"><span>Ngày</span><input onchange="setDate(this)" type="date" class="inputValue ngay"></label>
+		<label class="input"><span>Thu Nhập</span><input type="number" class="inputValue thunhap"></label>
+		<label class="input"><span>Xăng Xe</span><input type="number" class="inputValue xang"></label>
+		<label class="input"><span>Chi Tiêu</span><input type="number" class="inputValue chitieu"></label>
+		<label class="input submit"><button onclick="Save()" class="btnInput">Lưu Lại</button></label>
+	</div>
+	<div class="main-body result">
+		<select onchange="showThang(this)" class="list-thang">
+			<option class="thang-item" value="01" >Tháng 1</option>
+			<option class="thang-item" value="02" >Tháng 2</option>
+			<option class="thang-item" value="03" >Tháng 3</option>
+			<option class="thang-item" value="04" >Tháng 4</option>
+			<option class="thang-item" value="05" >Tháng 5</option>
+			<option class="thang-item" value="06" >Tháng 6</option>
+			<option class="thang-item" value="07" >Tháng 7</option>
+			<option class="thang-item" value="08" >Tháng 8</option>
+			<option class="thang-item" value="09" >Tháng 9</option>
+			<option class="thang-item" value="10" >Tháng 10</option>
+			<option class="thang-item" value="11" >Tháng 11</option>
+			<option class="thang-item" value="12" >Tháng 12</option>
+		</select>
+		<div class="list-thunhap">
+			<table class="content-thunhap" style="width:100%"></table>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+var today = new Date();
+function GetTime(today,$check){
+	if($check == true){
+		var $today = new Date(today);
+	}
+	else{
+		var $today = today;
+	}
+	console.log($today)
+	$ngay = $today.getDate();
+	$thang = $today.getMonth() + 1; //January is 0!
+	$nam = $today.getFullYear();
+	if ($ngay < 10) {
+	$ngay = '0' + $ngay;
+	}
+	if ($thang < 10) {
+	$thang = '0' + $thang;
+	}
+	console.log($nam+"-"+$thang+"-"+$ngay)
+}
+
+
+GetTime(today);
+$('.ngay').val($nam+"-"+$thang+"-"+$ngay);
+$('.thang-item[value="'+$thang+'"]').attr("selected","selected");
+function getTN(){
+	$data1 = localStorage.getItem("ChiTieu");
+	if($data1 != null){
+		$data = JSON.parse($data1);
+		if($data[$thang] == undefined){
+			$('.content-thunhap').html("<tr><td class='noneData'>Chưa có dữ liệu được lưu.</td></tr>");
+		}
+		else{
+			var $html = '<tr class="item-list-thang header-list"><th>Ngày</th><th>Thu Nhập</th><th>Xăng</th><th>Chi</th><th>Thực Nhận</th></tr>';
+			var $tthunhap = 0;
+			var $txang = 0;
+			var $tchi = 0;
+			var $ttn = 0;
+			for (var key in $data[$thang]) {
+				if ($data[$thang].hasOwnProperty(key)) {
+					var $ngay = key;
+					var $thunhap = Number($data[$thang][key][0]);
+					$tthunhap = $tthunhap + $thunhap;
+					var $xang = Number($data[$thang][key][1]);
+					$txang = $txang + $xang;
+					var $chi = Number($data[$thang][key][2]);
+					$tchi = $chi + $tchi;
+					var $tn = $thunhap - $xang - $chi;
+					$ttn = $ttn + $tn;
+					console.log($thunhap+"|"+$xang+"|"+$chi)
+					$html += '<tr class="item-list-thang header-list"><td>'+$ngay+'</td><td>'+$thunhap.toLocaleString()+'</td><td>'+$xang.toLocaleString()+'</td><td>'+$chi.toLocaleString()+'</td><td>'+$tn.toLocaleString()+'</td></tr>'
+				}
+			}
+			$html += '<tr class="item-list-thang header-list"><td>Tổng</td><td>'+$tthunhap.toLocaleString()+'</td><td>'+$txang.toLocaleString()+'</td><td>'+$tchi.toLocaleString()+'</td><td>'+$ttn.toLocaleString()+'</td></tr>';
+			$('.content-thunhap').html($html);
+		}
+	}
+}
+getTN();
+
+function showThang(e){
+ $thang = e.value;
+ getTN();
+}
+
+function setDate(e){
+	var $value = e.value;
+	GetTime($value,true)
+}
+
+
+function change(){
+    var $tab = $('.main-body.active');
+    $('.main-body').addClass("active");
+    $tab.removeClass("active");
+}
+
+function Save(){
+	var $thunhap = $(".thunhap").val();
+	var $xang = $(".xang").val();
+	var $chitieu = $(".chitieu").val();
+	var $data1 = localStorage.getItem("ChiTieu");
+	
+	if($data1 == null){
+		var $data = new Object()
+		$data[$thang] = new Object();
+		$data[$thang][$ngay] = [$thunhap,$xang,$chitieu];	
+		localStorage.setItem("ChiTieu",JSON.stringify($data));
+	}
+	else{
+		$data = JSON.parse($data1);
+		if($data[$thang] == undefined){
+			$data[$thang] = new Object();
+			$data[$thang][$ngay] = [$thunhap,$xang,$chitieu];
+		}
+		else{
+			$data[$thang][$ngay] = [$thunhap,$xang,$chitieu];
+		}
+		localStorage.setItem("ChiTieu",JSON.stringify($data));
+	}
+	$('.input input').val("");
+	alert("Đã Lưu lại chi tiêu "+$ngay+"-"+$thang+"-"+$nam);
+}
+</script>
+</body>
+</html>
