@@ -13,6 +13,7 @@ html,body {
     width: 100%;
     background: black;
     color: white;
+	overflow-x: hidden;
 }
 
 h2 {
@@ -33,11 +34,16 @@ label.input span {
     vertical-align: middle;
 }
 
+input.inputValue.ngay {
+    color: black;
+}
+
 label.input input {
     padding: 7px;
     border: 0;
     outline: 0;
     font-size: 2vh;
+    position: relative;
 }
 
 label.input.submit {
@@ -100,6 +106,7 @@ h2 {
     min-height: 40px;
     font-size: 2.5vh;
 }
+
 </style>
 </head>
 <body id="body-page">
@@ -107,9 +114,9 @@ h2 {
 	<h2><button class="change" onclick="change()"><></button>Quản Lý Chi Tiêu</h2>
 	<div class="main-body control active">
 		<label class="input"><span>Ngày</span><input onchange="setDate(this)" type="date" class="inputValue ngay"></label>
-		<label class="input"><span>Thu Nhập</span><input type="number" class="inputValue thunhap"></label>
-		<label class="input"><span>Xăng Xe</span><input type="number" class="inputValue xang"></label>
-		<label class="input"><span>Chi Tiêu</span><input type="number" class="inputValue chitieu"></label>
+		<label number="0" class="input"><span>Thu Nhập</span><input onchange="nhapso(this)" type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="inputValue thunhap"></label>
+		<label number="0" class="input"><span>Xăng Xe</span><input onchange="nhapso(this)"  type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"  class="inputValue xang"></label>
+		<label number="0" class="input"><span>Chi Tiêu</span><input   onchange="nhapso(this)"  type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"  class="inputValue chitieu"></label>
 		<label class="input submit"><button onclick="Save()" class="btnInput">Lưu Lại</button></label>
 	</div>
 	<div class="main-body result">
@@ -192,7 +199,7 @@ function getTN(){
 	}
 }
 getTN();
-
+setValue();
 function showThang(e){
  $thang = e.value;
  getTN();
@@ -201,8 +208,42 @@ function showThang(e){
 function setDate(e){
 	var $value = e.value;
 	GetTime($value,true)
+	setValue();
 }
 
+function setValue(){
+	$data1 = localStorage.getItem("ChiTieu");
+	if($data1 != null){
+		$data = JSON.parse($data1);
+		if($data[$thang] != undefined){
+			var $value = $data[$thang][$ngay];
+			if($value != undefined){
+				$('.thunhap').val($value[0]);
+				$('.xang').val($value[1]);
+				$('.chitieu').val($value[2]);
+				nhapso($('.thunhap')[0]);
+				nhapso($('.xang')[0]);
+				nhapso($('.chitieu')[0]);
+			}
+			else{
+				$('.inputValue[type="text"]').val("");
+				
+			}
+		}
+	}
+}
+
+function nhapso(e){
+	if(e.value.indexOf(".") > -1){
+		var $value = e.value.replace(/\./gi,"");
+		var $value2 = Number($value).toLocaleString();
+		$(e).val($value2);
+	}
+	else{
+		var $value = Number(e.value).toLocaleString();
+		$(e).val($value);
+	}
+}
 
 function change(){
     var $tab = $('.main-body.active');
@@ -212,9 +253,9 @@ function change(){
 }
 
 function Save(){
-	var $thunhap = $(".thunhap").val();
-	var $xang = $(".xang").val();
-	var $chitieu = $(".chitieu").val();
+	var $thunhap = $(".thunhap").val().replace(/\./gi,"");
+	var $xang = $(".xang").val().replace(/\./gi,"");
+	var $chitieu = $(".chitieu").val().replace(/\./gi,"");
 	var $data1 = localStorage.getItem("ChiTieu");
 	
 	if($data1 == null){
