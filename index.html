@@ -114,9 +114,9 @@ h2 {
 	<h2><button class="change" onclick="change()"><></button>Quản Lý Chi Tiêu</h2>
 	<div class="main-body control active">
 		<label class="input"><span>Ngày</span><input onchange="setDate(this)" type="date" class="inputValue ngay"></label>
-		<label number="0" class="input"><span>Thu Nhập</span><input onchange="nhapso(this)" type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="inputValue thunhap"></label>
-		<label number="0" class="input"><span>Xăng Xe</span><input onchange="nhapso(this)"  type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"  class="inputValue xang"></label>
-		<label number="0" class="input"><span>Chi Tiêu</span><input   onchange="nhapso(this)"  type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"  class="inputValue chitieu"></label>
+		<label number="0" class="input"><span>Thu Nhập</span><input onchange="nhapso(this)" type="text" oninput="this.value = this.value.replace(/[^0-9.\+\-\*\/]/g, '').replace(/(\..*?)\..*/g, '$1');" class="inputValue thunhap"></label>
+		<label number="0" class="input"><span>Xăng Xe</span><input onchange="nhapso(this)"  type="text" oninput="this.value = this.value.replace(/[^0-9.\+\-\*\/]/g, '').replace(/(\..*?)\..*/g, '$1');"  class="inputValue xang"></label>
+		<label number="0" class="input"><span>Chi Tiêu</span><input   onchange="nhapso(this)"  type="text" oninput="this.value = this.value.replace(/[^0-9.\+\-\*\/]/g, '').replace(/(\..*?)\..*/g, '$1');"  class="inputValue chitieu"></label>
 		<label class="input submit"><button onclick="Save()" class="btnInput">Lưu Lại</button></label>
 	</div>
 	<div class="main-body result">
@@ -236,11 +236,23 @@ function setValue(){
 function nhapso(e){
 	if(e.value.indexOf(".") > -1){
 		var $value = e.value.replace(/\./gi,"");
+		try{
+			$value = eval($value);
+		}
+		catch(err) {
+			alert(err);
+		}
 		var $value2 = Number($value).toLocaleString();
 		$(e).val($value2);
 	}
 	else{
-		var $value = Number(e.value).toLocaleString();
+		try{
+			$value = eval(e.value);
+		}
+		catch(err) {
+			alert(err);
+		}
+		var $value = $value.toLocaleString();
 		$(e).val($value);
 	}
 }
