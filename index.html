@@ -8,6 +8,8 @@
     <meta http-equiv="content-script-type" content="text/javascript" />
     <meta http-equiv="content-style-type" content="text/css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="FileSaver.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/markai30/googlesheet/36e91b3e/jszip.min.js"></script>
 <style>
 html,body {
     width: 100%;
@@ -17,7 +19,6 @@ html,body {
 }
 
 h2 {
-    text-align: center;
     position: relative;
 }
 
@@ -64,15 +65,7 @@ button.btnInput {
 button.btnInput:hover {
     background: brown;
 }
-button.change {
-    position: absolute;
-    left: 0;
-    background: cadetblue;
-    padding: 10px;
-    font-size: 2vh;
-    color: white;
-    border: 0;
-}
+
 .main-body {
     display: none;
 }
@@ -106,12 +99,40 @@ h2 {
     min-height: 40px;
     font-size: 2.5vh;
 }
+span.h2Right button {
+    font-size: 2vh;
+    float: right;
+    margin-right: 10px;
+    background: cadetblue;
+    color: white;
+    border: 0;
+    padding: 5px;
+}
+input#fileUpload {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
 
+button.loadB {
+    position: relative;
+}
 </style>
 </head>
 <body id="body-page">
 <div class="content">
-	<h2><button class="change" onclick="change()"><></button>Quản Lý Chi Tiêu</h2>
+	<h2>
+		
+		<label>Quản Lý Chi Tiêu</label>
+		<span class="h2Right">
+			<button class="saveB" onclick="saveTXT()">Lưu Data</button>
+			<button class="loadB">Tải Data <input onclick="clearFile(this)" onchange="Updata(this)" class="file-upload" type="file" id="fileUpload" accept="text/plain,.json,.js"></button>
+			<button class="change" onclick="change()">Chi Tiết</button>
+		</span>
+	</h2>
 	<div class="main-body control active">
 		<label class="input"><span>Ngày</span><input onchange="setDate(this)" type="date" class="inputValue ngay"></label>
 		<label number="0" class="input"><span>Thu Nhập</span><input onchange="nhapso(this)" type="text" oninput="this.value = this.value.replace(/[^0-9.\+\-\*\/]/g, '').replace(/(\..*?)\..*/g, '$1');" class="inputValue thunhap"></label>
@@ -289,6 +310,70 @@ function Save(){
 	}
 	$('.input input').val("");
 	alert("Đã Lưu lại chi tiêu "+$ngay+"-"+$thang+"-"+$nam);
+	saveCloud();
+}
+
+function saveTXT(){
+	var $data = localStorage.getItem("ChiTieu");
+	if($data == null){
+		alert("Không có dữ liệu lưu sẵn");		
+	}
+	else{
+		$data = JSON.stringify($data);
+		var blob = new Blob([$data], {type: "application/json;charset=utf-8"});
+		saveAs(blob, "chitieu.json");
+	}
+	saveCloud();
+}
+function clearFile(e){// Hàm xóa input file
+	$(e).val("");
+}
+
+function Updata(e){
+	var $file = document.getElementById("fileUpload").files[0];
+	var $name = $file.name;
+	var fileReader = new FileReader();
+	fileReader.onload = function(fileLoadedEvent) {
+		// Đọc dữ liệu của file;
+		var $textdata = fileLoadedEvent.target.result;
+		compleText($textdata);
+	}
+	fileReader.readAsText($file, "UTF-8");
+	
+}
+function compleText($text){
+	try{
+		console.log($text);
+		
+		var $obj = JSON.parse($text);
+		if($obj != undefined){
+			localStorage.setItem("ChiTieu",$obj);
+			getTN();
+			setValue();
+			alert("Đã cập nhật dữ liệu mới.");
+		}
+		else{
+			alert("Có lỗi khi chuyển đổi dữ liệu 2");
+		}
+	}
+	catch{
+		alert("Có lỗi khi chuyển đổi dữ liệu 1");
+	}
+	console.log($text);
+}
+
+function saveCloud(){
+	var $data = localStorage.getItem("ChiTieu");
+	if($data == null){
+		alert("Không có dữ liệu lưu sẵn");		
+	}
+	else{
+		var $json = encodeURI($data);
+		$.get("https://script.google.com/macros/s/AKfycby86jpOMr3QwB0PPMUJcYqXAO-POUdOUtxm5cwDOy64wgWNtqk0xhhfJasN2UPntGHO/exec?action=post&value="+$json).done(function (data) {
+			alert(data);
+		})
+	}
+
 }
 </script>
 </body>
