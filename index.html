@@ -347,11 +347,10 @@ function compleText($text){
 	try{
 		console.log($text);
 		
-		var $obj3 = JSON.parse($text);
+		var $obj3 = JSON.parse($textUp);
 		if($obj3 != undefined){
 			localStorage.setItem("ChiTieu",JSON.stringify($obj3));
 			getTN();
-			setValue();
 			alert("Đã cập nhật dữ liệu mới.");
 		}
 		else{
