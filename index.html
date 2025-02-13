@@ -200,14 +200,18 @@ function getTN(){
 			var $txang = 0;
 			var $tchi = 0;
 			var $ttn = 0;
-			for (var key in $data[$thang]) {
-				if ($data[$thang].hasOwnProperty(key)) {
-					var $ngay = key;
-					var $thunhap = Number($data[$thang][key][0]);
+			var $maxThg = Object.keys($data[$thang]).length;
+			var $listObj = Object.keys($data[$thang]).sort();
+			for (var $m = 0;$m < $maxThg;$m++) {
+				var $keyOBJ = $listObj[$m];
+				
+				if ($data[$thang].hasOwnProperty($keyOBJ)) {
+					var $ngay = $keyOBJ;
+					var $thunhap = Number($data[$thang][$keyOBJ][0]);
 					$tthunhap = $tthunhap + $thunhap;
-					var $xang = Number($data[$thang][key][1]);
+					var $xang = Number($data[$thang][$keyOBJ][1]);
 					$txang = $txang + $xang;
-					var $chi = Number($data[$thang][key][2]);
+					var $chi = Number($data[$thang][$keyOBJ][2]);
 					$tchi = $chi + $tchi;
 					var $tn = $thunhap - $xang - $chi;
 					$ttn = $ttn + $tn;
@@ -274,8 +278,12 @@ function nhapso(e){
 		catch(err) {
 			alert(err);
 		}
-		var $value = $value.toLocaleString();
-		$(e).val($value);
+		if($value == undefined){
+		}
+		else{
+			var $value = $value.toLocaleString();
+			$(e).val($value);
+		}
 	}
 }
 
@@ -369,10 +377,20 @@ function saveCloud(){
 		alert("Không có dữ liệu lưu sẵn");		
 	}
 	else{
+	var $json = encodeURI(localStorage.getItem("ChiTieu"));
+	$.post("https://script.google.com/macros/s/AKfycbwooaCMD6pJZRJAi9QUZ3rXQzXFxzZQ6_GAEYUbqUyjBdt41TVB093GLgglOKXoBZs5/exec",
+	  {
+		value: $json,
+	  },
+	  function(data, status){
+		alert(data);
+	  });
+		/*
 		var $json = encodeURI($data);
 		$.get("https://script.google.com/macros/s/AKfycby86jpOMr3QwB0PPMUJcYqXAO-POUdOUtxm5cwDOy64wgWNtqk0xhhfJasN2UPntGHO/exec?action=post&value="+$json).done(function (data) {
 			alert(data);
 		})
+		*/
 	}
 
 }
